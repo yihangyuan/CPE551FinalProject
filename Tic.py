@@ -50,6 +50,9 @@ class Algorithm_Minimax():
     https://www.youtube.com/watch?v=trKjYdBASyQ
     
     """
+
+    def __init__(self):
+        self.scores = {-1:-10, 0:0, 1:10} # create a dictionary for score, "X" win: -10, "O" win +10
     
     
 
@@ -57,93 +60,84 @@ class Algorithm_Minimax():
     def bestMove(self, board, player):
         ## this function return the bestMove location
         move = None
-        bestScore = float('-inf');
+        bestScore = float('inf') if player == -1 else float('-inf')
+
         for row in range(len(board)):
-            for col in range(len(row)):
+            for col in range(len(board[row])):
                 if board[row][col] == 0:
                     board[row][col] = player
-                    score =  self.minimax(row,col, isMaximizing=False)
+                    score = self.minimax(board, row, col)
                     board[row][col] = 0
-                if score > bestScore:
-                    bestScore = score
-                    move = (row, col)
+                    
+                    if player == -1:
+                        if score < bestScore:
+                            bestScore = score
+                            move = (row, col)
+                    else:
+                        if score > bestScore:
+                            bestScore = score
+                            move = (row, col)
+
                     
         return move
     
-    
-    #     let scores = {
-    #     X: 10,
-    #     O: -10,
-    #     tie: 0
-    #     };
-    
-    def checkWinner(self, board):
+     
+    def checkWinner(self, board, row, col):
         
-        t = 3 * val
+        val = board[row][col]
+        t = 3 * val 
         
-        checked_row = sum(self.grid[row])
-        checked_col = sum([r[col] for r in self.grid ])
-        checked_diag = sum([self.grid[i][i] for i in range(3)])
-        checked_anti_diag = sum([self.grid[i][2-i] for i in range(3)])
+        checked_row = sum(board[row])
+        checked_col = sum([r[col] for r in board ])
+        checked_diag = sum([board[i][i] for i in range(3)])
+        checked_anti_diag = sum([board[i][2-i] for i in range(3)])
         
         if checked_row == t or checked_col == t or checked_diag == t or checked_anti_diag == t:
-            return True
+            return val # winner
         
-        return False 
+        for r in range(len(board)):
+            for c in range(len(board[r])):
+                if board[r][c] == 0:
+                    return None  # game go on      
         
-        pass
+        return 0  # Draw!
+
         
-    def minimax(row,col,isMaximizing=True):
+    def minimax(self, board, row, col):
         # this function compute the minimax score for the given location
+        result = self.checkWinner(board,row,col)
+        if result != None:
+            return self.scores[board[row][col]]
         
-    
+        if board[row][col] == -1:
+
+            bestScore = float('-inf')
+
+            for r in range(len(board)):
+                for c in range(len(board[r])):
+                    if board[r][c] == 0:
+                        board[r][c] = 1
+                        score = self.minimax(board, r, c)
+                        board[r][c] = 0
+                        bestScore = max(score, bestScore)
+        
+            return bestScore
 
 
+        else:
 
-    
-    
+            bestScore = float('inf')
 
-    
-
-    # function minimax(board, depth, isMaximizing) {
-    # let result = checkWinner();
-    # if (result !== null) {
-    #     return scores[result];
-    # }
-
-    # if (isMaximizing) {
-    #     let bestScore = -Infinity;
-    #     for (let i = 0; i < 3; i++) {
-    #     for (let j = 0; j < 3; j++) {
-    #         // Is the spot available?
-    #         if (board[i][j] == '') {
-    #         board[i][j] = ai;
-    #         let score = minimax(board, depth + 1, false);
-    #         board[i][j] = '';
-    #         bestScore = max(score, bestScore);
-    #         }
-    #     }
-    #     }
-    #     return bestScore;
-    # } else {
-    #     let bestScore = Infinity;
-    #     for (let i = 0; i < 3; i++) {
-    #     for (let j = 0; j < 3; j++) {
-    #         // Is the spot available?
-    #         if (board[i][j] == '') {
-    #         board[i][j] = human;
-    #         let score = minimax(board, depth + 1, true);
-    #         board[i][j] = '';
-    #         bestScore = min(score, bestScore);
-    #         }
-    #     }
-    #     }
-    #     return bestScore;
-    # }
-    # }
-
-    
-
+            for r in range(len(board)):
+                for c in range(len(board[r])):
+                    if board[r][c] == 0:
+                        board[r][c] = -1
+                        score = self.minimax(board, r, c)
+                        board[r][c] = 0
+                        bestScore = min(score, bestScore)
+            
+            return bestScore
+        
 
 
 
@@ -154,11 +148,12 @@ class Tic_Tac_Toe():
         self.memory = [[0 for col in range(3)] for row in range(3)] # the matrix that store the information of grid
         self.grid = Grid()
         self.AI = Algorithm_Minimax()
+        self.play()
 
 
     def is_valid_move(self, row, col):
          
-         if 0 <= row < 3 and 0 <= col < 3 and self.info[row][col] == 0:
+         if 0 <= row < 3 and 0 <= col < 3 and self.memory[row][col] == 0:
             return True
          
          return False
@@ -167,10 +162,10 @@ class Tic_Tac_Toe():
         
         t = 3 * val
         
-        checked_row = sum(self.grid[row])
-        checked_col = sum([r[col] for r in self.grid ])
-        checked_diag = sum([self.grid[i][i] for i in range(3)])
-        checked_anti_diag = sum([self.grid[i][2-i] for i in range(3)])
+        checked_row = sum(self.memory[row])
+        checked_col = sum([r[col] for r in self.memory ])
+        checked_diag = sum([self.memory[i][i] for i in range(3)])
+        checked_anti_diag = sum([self.memory[i][2-i] for i in range(3)])
         
         if checked_row == t or checked_col == t or checked_diag == t or checked_anti_diag == t:
             return True
@@ -179,7 +174,7 @@ class Tic_Tac_Toe():
         
     
     def board_check(self):
-        for row in self.grid:
+        for row in self.memory:
             for col in row:
                 if col ==0:
                     return False
@@ -233,6 +228,7 @@ class Tic_Tac_Toe():
                         break
                     
                     row, col = map(int, next_move.split(','))
+                    print(row,col)
                     
 
 
@@ -243,7 +239,7 @@ class Tic_Tac_Toe():
                     self.grid.draw_grid() # show grid for this move
                     
                     if self.win_check(row, col, val) is True: # win check
-                        print(f"{current_player} won!")
+                        print("player" f"{current_player} won!")
                         break
                         
                     
@@ -261,9 +257,15 @@ class Tic_Tac_Toe():
                 
                     
                     
+test = Tic_Tac_Toe(1)              
                 
-                
-                
+# test = Algorithm_Minimax ()
+
+# board = [[-1,1,1],[0,1,0],[0,-1,-1]]
+
+# result = test.bestMove([[-1,1,1],[0,1,0],[0,-1,-1]],-1)
+# print(result)
+
             
             
             
