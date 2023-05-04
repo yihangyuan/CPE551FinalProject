@@ -1,4 +1,5 @@
 import random
+import time
 
 class Grid():
 
@@ -10,7 +11,7 @@ class Grid():
     
     def __init__(self, matrix = None):
 
-        self.grid = [[' ' for space in range(3)] for row in range(3)]
+        self.grid = [[' ' for space in range(3)] for row in range(3)] # store grid inside class
 
         if matrix is not None:
 
@@ -192,17 +193,22 @@ class Tic_Tac_Toe():
         AI_player = None
         
         if self.num_of_player == 1:
-            
+            print("="*64)
+            print("Ramdon selecting first player...")
+            print("="*64)
             AI_player = random.choice([playerX, playerO])
+            time.sleep(1)
             
             if AI_player == playerX:
                 print("AI go first")  # write something
+                print("="*64)
             else:
-                print("You go first") 
+                print("You go first")
+                print("="*64) 
             
         current_player = playerX  # playerX always go first
         self.grid.draw_grid() # show grid for human player at begin
-        
+        print("="*64)
         
         while True:
             
@@ -217,6 +223,11 @@ class Tic_Tac_Toe():
                 # get row col for this turn
                 if current_player == AI_player:
                     row, col = self.AI.bestMove(self.memory, val) 
+                    # print("="*64)
+                    time.sleep(1)
+                    print(f"AI select postion({row},{col})")
+                    print("="*64)
+                    time.sleep(1)
                 else:
                      
                     print(f"Player {current_player}, make your move:")
@@ -228,7 +239,12 @@ class Tic_Tac_Toe():
                         break
                     
                     row, col = map(int, next_move.split(','))
-                    print(row,col)
+                    # print("="*64)
+                    if self.num_of_player == 1:
+                        print(f"You select postion({row},{col})")
+                    else:
+                        print(f"{current_player} select postion({row},{col})")
+                    print("="*64)
                     
 
 
@@ -237,6 +253,7 @@ class Tic_Tac_Toe():
                     self.memory[row][col] = val # set the value to memory
                     self.grid.update_grid(row,col,val)
                     self.grid.draw_grid() # show grid for this move
+                    print("="*64)
                     
                     if self.win_check(row, col, val) is True: # win check
                         print("player" f"{current_player} won!")
@@ -255,9 +272,16 @@ class Tic_Tac_Toe():
                 print("Invalid input. Please enter row and column as comma separated integers.")
                 
                 
-                    
-                    
-test = Tic_Tac_Toe(1)              
+while True:                    
+    num_of_player = int(input("choose number of player, 1 for play with AI, 2 for play with human"))
+
+    if num_of_player == 1 or num_of_player == 2:
+        Game = Tic_Tac_Toe(num_of_player=num_of_player)
+        break
+    else:
+        print("Invaild input! try again")
+
+             
                 
 # test = Algorithm_Minimax ()
 
